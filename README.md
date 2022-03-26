@@ -17,7 +17,21 @@ than database) through web browser. Example of such: Code Sandbox, stack blitz a
 assessment platforms like Hacker rank. Not limited to create your own programming
 language as well.
 
+- [Overview](#overview)
+  * [Basic Structure](#basic-structure)
+  * [High Level Design](#high-level-design)
+    + [Lexer](#lexer)
+      - [Tokens/Identifiers](#tokens-identifiers)
+      - [Task of Lexer](#task-of-lexer)
+    + [Parsing](#parsing)
+    + [Abstract Source Tree (AST)](#abstract-source-tree--ast-)
+    + [Exceution](#exceution)
+    + [HLD Diagram](#hld-diagram)
+
+
 ## Overview
+
+
 
 ### Basic Structure
 
@@ -52,5 +66,5 @@ The second stage of the pipeline is the parser. The parser turns a list of token
 
 
 
-##### HLD Diagram
+#### HLD Diagram
 ![Compiler Image](./compiler.png)
