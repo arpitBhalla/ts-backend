@@ -1,9 +1,11 @@
-import { NotFoundError, ForbiddenError, Req } from "routing-controllers";
+import { NotFoundError, ForbiddenError, Req, Res } from "routing-controllers";
 import { prisma } from "@core/db";
-import { hash } from "@utils/auth";
+import { hash, signAuthToken } from "@utils/auth";
 import { Inject, Service } from "typedi";
 import { EmailI, LoginI, UserI } from "./interface";
-import { Request } from "express";
+import { Request, response } from "express";
+import { Cookie } from "@utils/cookie";
+
 @Service()
 export class AuthService {
   async create(user: UserI) {
@@ -30,14 +32,20 @@ export class AuthService {
     } else {
       throw new ForbiddenError("Password is incorrect");
     }
-    return {
-      message: "Login success",
-      profile: {
-        name: user.name,
-        email: user.email,
-        premise: user.premise,
-      },
-    };
+    // const user = {
+    //   id: "demo",
+    //   premise: "sd",
+    //   role: "Sd",
+    //   name: "as",
+    //   email: "As",
+    // };
+
+    const token = signAuthToken({
+      id: String(user.id),
+      premise: String(user.premise),
+      role: user.role as any,
+    });
+    return { user, token };
   }
 
   async changePassword({ email, password }: LoginI) {

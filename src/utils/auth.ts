@@ -1,20 +1,15 @@
 import { createHash } from "crypto";
 import { CookieOptions, Response } from "express";
 import jwt from "jsonwebtoken";
+import { Role } from "../types";
 
 const secret = "secret";
 
 export const hash = (s: string) => createHash("sha256").update(s).digest("hex");
 
-export const cookie = (): CookieOptions => {
-  return {
-    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
-  };
-};
-
 export const signJwt = <T extends Object>(payload: T) => {
   const token = jwt.sign(payload, secret, {
-    expiresIn: "1d",
+    expiresIn: "7d",
   });
   return token;
 };
@@ -27,3 +22,13 @@ export const verifyJwt = <T = {}>(token: string) => {
     throw new Error("Unable to parse token");
   }
 };
+
+export type TokenUser = { id: string; role: Role; premise: string };
+
+export function signAuthToken(payload: TokenUser) {
+  return signJwt(payload);
+}
+
+export function verifyAuthToken(token: string) {
+  return verifyJwt<TokenUser>(token);
+}

@@ -3,18 +3,13 @@ import {
   Post,
   JsonController,
   Authorized,
-  HeaderParam,
-  Get,
-  NotFoundError,
-  BadRequestError,
-  ForbiddenError,
-  Req,
+  Res,
 } from "routing-controllers";
 import { AuthService } from "./service";
 import { Inject, Service } from "typedi";
 import { EmailI, LoginI, UserI } from "./interface";
-import { ValidationError } from "class-validator";
-import { Request } from "express";
+import { Request, Response } from "express";
+import { Cookie, SetCookie } from "@utils/cookie";
 
 @Service()
 @JsonController("/auth")
@@ -23,14 +18,26 @@ export class authController {
   private authService: AuthService;
 
   @Post("/login")
-  login(@Body() body: LoginI) {
-    return this.authService.login(body);
+  async login(@Body() body: LoginI, @Res() res: Response) {
+    const { user, token } = await this.authService.login(body);
+
+    Cookie.setAuth(res, token);
+
+    return {
+      message: "Login success",
+
+      profile: {
+        name: user.name,
+        email: user.email,
+        premise: user.premise,
+      },
+    };
   }
 
-  @Post("/register")
-  register(@Body() body: UserI) {
-    return this.authService.create(body);
-  }
+  // @Post("/register")
+  // register(@Body() body: UserI) {
+  //   return this.authService.create(body);
+  // }
 
   @Authorized()
   @Post("/change_password")
@@ -38,10 +45,13 @@ export class authController {
     return this.authService.changePassword(body);
   }
 
-  @Authorized("ADMIN")
-  @Get("/logout")
-  logout(@HeaderParam("premise") p: string) {
-    console.log(p);
-    return this.authService.logout();
+  @Authorized()
+  @Post("/logout")
+  logout(@Res() res: Response) {
+    Cookie.clearAuth(res);
+
+    return {
+      message: "Success",
+    };
   }
 }

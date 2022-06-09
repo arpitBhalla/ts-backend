@@ -1,33 +1,32 @@
 import { Role } from "../types";
 import { Request, Response } from "express";
-import { signJwt, verifyJwt } from "@utils/auth";
-import {
-  ForbiddenError,
-  HttpError,
-  UnauthorizedError,
-} from "routing-controllers";
+import { TokenUser, verifyAuthToken } from "@utils/auth";
+import { ForbiddenError, UnauthorizedError } from "routing-controllers";
 
 interface Action {
   request: Request;
   response: Response;
 }
 
-type TokenUser = { id: string; role: Role; premise: string };
-
-export async function auth(
-  { request, response }: Action,
-  roles: Role[] = []
-): Promise<boolean> {
+export function currentUser({ request }: Action) {
   const token = request.cookies.token;
   if (!token) {
     throw new UnauthorizedError();
   }
   let user: TokenUser;
   try {
-    user = verifyJwt<TokenUser>(token);
+    user = verifyAuthToken(token);
   } catch (error) {
     throw new UnauthorizedError("Unauthorized");
   }
+  return user;
+}
+
+export async function auth(
+  { request, response }: Action,
+  roles: Role[] = []
+): Promise<boolean> {
+  const user = currentUser({ request, response });
 
   if (!roles.length) {
     return true;
